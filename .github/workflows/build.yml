@@ -1,0 +1,48 @@
+on:
+  push:
+#     Sequence of patterns matched against refs/tags
+    tags:
+    - '*' # Tag events
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codes
+        uses: actions/checkout@v1
+      - name: Build ipk
+        id: build_ipk
+        env:
+          IPK_PACKAGE: luci-app-zerotier
+          IPK_VERSION: ${{ github.ref_name }}
+          IPK_DEPENDS: zerotier
+          IPK_MAINTAINER: xiaoyao9184
+          IPK_DESCRIPTION: luci for zerotier
+          OPENWRT_BRANCH: openwrt-18.06
+        run: |
+          chmod +x $GITHUB_WORKSPACE/build.sh
+          $GITHUB_WORKSPACE/build.sh
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IPK_PACKAGE: luci-app-zerotier
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: /tmp/${{ env.IPK_PACKAGE }}/${{ env.IPK_PACKAGE }}_${{ github.ref_name }}_all.ipk
+          asset_name: ${{ env.IPK_PACKAGE }}_${{ github.ref_name }}_all.ipk
+          asset_content_type: application/octet-stream
