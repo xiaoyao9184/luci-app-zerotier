@@ -27,7 +27,7 @@ start_instance() {
 	[ -d /etc/config/zero ] || mkdir -p /etc/config/zero
 	config_path=/etc/config/zero
 	
-	config_get_bool port $cfg 'port'
+	config_get port $cfg 'port'
 	config_get secret $cfg 'secret'
 
 	# Remove existing link or folder
