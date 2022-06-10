@@ -89,13 +89,13 @@ start_instance() {
 		done
 		zt0=$(ifconfig | grep zt | awk '{print $1}')
 		echo "zt interface $zt0 is started!"
-		if [ -z "$(uci get network.zerotier)" ];  then
+		if [ -z "$(uci -q get network.zerotier)" ];  then
 			uci set network.zerotier=interface
 			uci set network.zerotier.proto='static'
 		fi
 		config_get nat $cfg 'nat'
 		if [ "$nat" == "1" ];  then
-			if [ -z "$(uci get firewall.ztzone)" ];  then
+			if [ -z "$(uci -q get firewall.ztzone)" ];  then
 				uci set firewall.ztzone=zone
 				uci set firewall.ztzone.input='ACCEPT'
 				uci set firewall.ztzone.output='ACCEPT'
